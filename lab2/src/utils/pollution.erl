@@ -12,7 +12,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4]).
+-export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4, get_one_value/4]).
 
 %% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
 %% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
@@ -22,6 +22,11 @@
 %% get_station_min/3 - zwraca minimalną wartość parametru z zadanej stacji i danego typu;
 %% get_daily_mean/3 - zwraca średnią wartość parametru danego typu, danego dnia na wszystkich stacjach;
 
+get_station_coordinates(Station, Monitor) ->
+  case maps:get(Station, Monitor#monitor.stationToStationRecMap, error) of
+    #station{coordinates = StationCoordinates} -> StationCoordinates;
+    error -> {error, lists:flatten(io_lib:format("Station ~p does not exist!!!~n", [Station]))}
+  end.
 
 %%%%%%%%%%%%%%%% create_monitor() %%%%%%%%%%%%%%%%
 
@@ -105,7 +110,28 @@ remove_value(Station, Datetime, Type, Monitor) when is_record(Monitor, monitor) 
       end
   end;
 remove_value(_, _, _, _) -> {error, "remove_value(): Invalid arguments!!!~n"}.
-%% get_one_value() -> ok.
+
+%%%%%%%%%%%%%%%% get_one_value() %%%%%%%%%%%%%%%%
+
+%%get_one_value("Stacja 1", Time, "PM10", M3)
+get_one_value(Station, Datetime, Type, Monitor) when is_record(Monitor, monitor) ->
+  case get_station_coordinates(Station, Monitor) of
+    {error, Message} -> {error, Message};
+    StationCoordinates ->
+      Measurement = #measurement{
+        stationCoordinates = StationCoordinates,
+        datetime = Datetime,
+        type = Type
+      },
+      MonitorMeasurementsMap = Monitor#monitor.measurementToVal,
+      maps:get(
+        Measurement,
+        MonitorMeasurementsMap,
+        {error, lists:flatten(io_lib:format("Map doesn't contain key ~p!!!~n", [Measurement]))}
+      )
+  end;
+
+get_one_value(_, _, _, _) -> {error, "get_one_value(): Invalid arguments!!!~n"}.
 %% get_station_min() -> ok.
 %% get_daily_mean() -> ok.
 
