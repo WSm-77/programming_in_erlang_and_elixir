@@ -35,8 +35,7 @@ add_station(StationName, {X, Y}, Monitor) when is_record(Monitor, monitor) ->
     _ ->
       StationRec = #station{name = StationName, coordinates = Coordinates},
       NewMonitorMap = MonitorMap#{StationName => StationRec, Coordinates => StationRec},
-      NewMonitor = Monitor#monitor{stationToStationRecMap = NewMonitorMap},
-      {ok, NewMonitor}
+      Monitor#monitor{stationToStationRecMap = NewMonitorMap}
   end;
 
 add_station(_, _, _) -> {error, "Invalid arguments!!! Expected call: add_station(StationName, {X, Y}, Monitor),
@@ -45,17 +44,18 @@ add_station(_, _, _) -> {error, "Invalid arguments!!! Expected call: add_station
 add_measurement(Measurement, Val, MeasurementsMap) when is_record(Measurement, measurement) ->
   case MeasurementsMap of
     #{Measurement := _} -> {error, lists:flatten(io:format("Map alredy contains key = ~p!!!", [Measurement]))};
-    _ -> {ok, MeasurementsMap#{Measurement => Val}}
+    _ -> MeasurementsMap#{Measurement => Val}
   end;
 add_measurement(_, _, _) -> {error, "add_measurement(): Invalid arguments!!!"}.
 
-add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor) ->
+%%add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor) ->
+add_value(Station, Datetime, Type, Val, Monitor) ->
   MonitorStationsMap = Monitor#monitor.stationToStationRecMap,
   if
     not is_map_key(Station, MonitorStationsMap) ->
       {error, lists:flatten(io_lib:format("Station ~p does not exist!!!", [Station]))};
     true ->
-      {_, StationCoordinates} = maps:get(Station, MonitorStationsMap),
+      #station{coordinates = StationCoordinates} = maps:get(Station, MonitorStationsMap),
       Measurement = #measurement{
         stationCoordinates = StationCoordinates,
         datetime = Datetime,
@@ -63,12 +63,10 @@ add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor
       },
       case add_measurement(Measurement, Val, Monitor#monitor.measurementToVal) of
         {error, Message} -> {error, Message};
-        {Res, NewMeasurementsMap} ->
-          {Res, Monitor#monitor{measurementToVal = NewMeasurementsMap}};
-        _ -> {error, "Unexpected result!!!"}
+        NewMeasurementsMap -> Monitor#monitor{measurementToVal = NewMeasurementsMap}
       end
-  end;
-add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!"}.
+  end.
+%%add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!"}.
 %% remove_value() -> ok.
 %% get_one_value() -> ok.
 %% get_station_min() -> ok.
