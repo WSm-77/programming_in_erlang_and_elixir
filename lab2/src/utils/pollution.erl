@@ -12,7 +12,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4, get_one_value/4]).
+-export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3]).
 
 %% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
 %% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
@@ -132,7 +132,25 @@ get_one_value(Station, Datetime, Type, Monitor) when is_record(Monitor, monitor)
   end;
 
 get_one_value(_, _, _, _) -> {error, "get_one_value(): Invalid arguments!!!~n"}.
+
 %% get_station_min() -> ok.
-%% get_daily_mean() -> ok.
+
+get_daily_mean(Type, Date, Monitor) when is_record(Monitor, monitor) ->
+  Values = maps:fold(
+    fun (K, V, Acc) ->
+      case K of
+        #measurement{type = Type, datetime = {Date, _}} -> Acc ++ [V];
+        _ -> Acc
+      end
+    end,
+    [],
+    Monitor#monitor.measurementToVal
+  ),
+  case length(Values) of
+    0 -> {error, lists:flatten(io_lib:format("No measurements of type ~p found!!!~n", [Type]))};
+    N -> lists:sum(Values) / N
+  end;
+
+get_daily_mean(_, _, _) -> {error, "get_daily_mean(): Invalid arguments!!!~n"}.
 
 test() -> #monitor{}.
