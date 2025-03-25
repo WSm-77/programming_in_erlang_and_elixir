@@ -47,7 +47,7 @@ add_measurement(Measurement, Val, MeasurementsMap) when is_record(Measurement, m
     #{Measurement := _} -> {error, lists:flatten(io:format("Map alredy contains key = ~p!!!", [Measurement]))};
     _ -> {ok, MeasurementsMap#{Measurement => Val}}
   end;
-add_measurement(_, _, _) -> {error, "Invalid arguments!!!"}.
+add_measurement(_, _, _) -> {error, "add_measurement(): Invalid arguments!!!"}.
 
 add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor) ->
   MonitorStationsMap = Monitor#monitor.stationToStationRecMap,
@@ -68,7 +68,7 @@ add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor
         _ -> {error, "Unexpected result!!!"}
       end
   end;
-add_value(_, _, _, _, _) -> {error, "Invalid arguments!!!"}.
+add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!"}.
 %% remove_value() -> ok.
 %% get_one_value() -> ok.
 %% get_station_min() -> ok.
