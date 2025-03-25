@@ -12,7 +12,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([create_monitor/0, add_station/3, test/0, add_value/5]).
+-export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4]).
 
 %% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
 %% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
@@ -34,8 +34,8 @@ add_station(StationName, {X, Y}, Monitor) when is_record(Monitor, monitor), is_n
   Coordinates = {X, Y},
   MonitorMap = Monitor#monitor.stationToStationRecMap,
   case MonitorMap of
-    #{StationName := _} -> {error, "Station with given name alredy exists!!!"};
-    #{Coordinates := _} -> {error, "Station with given coordinates alredy exists!!!"};
+    #{StationName := _} -> {error, "Station with given name alredy exists!!!~n"};
+    #{Coordinates := _} -> {error, "Station with given coordinates alredy exists!!!~n"};
     _ ->
       StationRec = #station{name = StationName, coordinates = Coordinates},
       NewMonitorMap = MonitorMap#{StationName => StationRec, Coordinates => StationRec},
@@ -43,17 +43,17 @@ add_station(StationName, {X, Y}, Monitor) when is_record(Monitor, monitor), is_n
   end;
 
 add_station(_, _, _) -> {error, "Invalid arguments!!! Expected call: add_station(StationName, {X, Y}, Monitor),
- where monitor is record of type 'monitor'"}.
+ where monitor is record of type 'monitor'~n"}.
 
 %%%%%%%%%%%%%%%% add_value() %%%%%%%%%%%%%%%%
 
 %% create new map with added measurement for monitor
 add_measurement(Measurement, Val, MeasurementsMap) when is_record(Measurement, measurement) ->
   case MeasurementsMap of
-    #{Measurement := _} -> {error, lists:flatten(io:format("Map alredy contains key = ~p!!!", [Measurement]))};
+    #{Measurement := _} -> {error, lists:flatten(io_lib:format("Map alredy contains key = ~p!!!~n", [Measurement]))};
     _ -> MeasurementsMap#{Measurement => Val}
   end;
-add_measurement(_, _, _) -> {error, "add_measurement(): Invalid arguments!!!"}.
+add_measurement(_, _, _) -> {error, "add_measurement(): Invalid arguments!!!~n"}.
 
 %% 1. check if station exists
 %% 2. get station coordinates
@@ -65,7 +65,7 @@ add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor
   MonitorStationsMap = Monitor#monitor.stationToStationRecMap,
   if
     not is_map_key(Station, MonitorStationsMap) ->
-      {error, lists:flatten(io_lib:format("Station ~p does not exist!!!", [Station]))};
+      {error, lists:flatten(io_lib:format("Station ~p does not exist!!!~n", [Station]))};
     true ->
       #station{coordinates = StationCoordinates} = maps:get(Station, MonitorStationsMap),
       Measurement = #measurement{
@@ -79,8 +79,32 @@ add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor
       end
   end;
 
-add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!"}.
-%% remove_value() -> ok.
+add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!~n"}.
+
+%%%%%%%%%%%%%%%% remove_value() %%%%%%%%%%%%%%%%
+
+remove_value(Station, Datetime, Type, Monitor) when is_record(Monitor, monitor) ->
+  MonitorStationMap = Monitor#monitor.stationToStationRecMap,
+  if
+    not is_map_key(Station, MonitorStationMap) ->
+      {error, lists:flatten(io_lib:format("Station ~p does not exist!!!~n", [Station]))};
+    true ->
+      #station{coordinates = StationCoordinates} = maps:get(Station, MonitorStationMap),
+      MeasurementToRemove = #measurement{
+        stationCoordinates = StationCoordinates,
+        datetime = Datetime,
+        type = Type
+      },
+      if
+        not is_map_key(MeasurementToRemove, Monitor#monitor.measurementToVal) ->
+          {error, lists:flatten(io_lib:format("Map doesn't contain key ~p!!!~n", [MeasurementToRemove]))};
+        true ->
+          Monitor#monitor{
+            measurementToVal = maps:remove(MeasurementToRemove, Monitor#monitor.measurementToVal)
+          }
+      end
+  end;
+remove_value(_, _, _, _) -> {error, "remove_value(): Invalid arguments!!!~n"}.
 %% get_one_value() -> ok.
 %% get_station_min() -> ok.
 %% get_daily_mean() -> ok.
