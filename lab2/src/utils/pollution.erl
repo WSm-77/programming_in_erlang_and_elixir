@@ -12,7 +12,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3]).
+-export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3, get_station_min/3]).
 
 %% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
 %% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
@@ -133,7 +133,27 @@ get_one_value(Station, Datetime, Type, Monitor) when is_record(Monitor, monitor)
 
 get_one_value(_, _, _, _) -> {error, "get_one_value(): Invalid arguments!!!~n"}.
 
-%% get_station_min() -> ok.
+get_station_min(Station, Type, Monitor) when is_record(Monitor, monitor) ->
+  case get_station_coordinates(Station, Monitor) of
+    {error, Message} -> {error, Message};
+    StationCoordinates ->
+      Values = maps:fold(
+        fun (K, V, Acc) ->
+          case K of
+            #measurement{stationCoordinates = StationCoordinates, type = Type} ->
+              Acc ++ [V];
+            _ -> Acc
+          end
+        end,
+        [],
+        Monitor#monitor.measurementToVal
+      ),
+      case length(Values) of
+        0 -> {error, lists:flatten(io_lib:format("Station ~p does not have measurements of type ~p!!!~n", [Station, Type]))};
+        _ -> lists:min(Values)
+      end
+  end;
+get_station_min(_, _, _) -> {error, "get_station_min(): Inavalid arguments!!!~n"}.
 
 get_daily_mean(Type, Date, Monitor) when is_record(Monitor, monitor) ->
   Values = maps:fold(
