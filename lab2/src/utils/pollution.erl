@@ -23,10 +23,14 @@
 %% get_daily_mean/3 - zwraca średnią wartość parametru danego typu, danego dnia na wszystkich stacjach;
 
 
+%%%%%%%%%%%%%%%% create_monitor() %%%%%%%%%%%%%%%%
 
 create_monitor() -> #monitor{}.
 
-add_station(StationName, {X, Y}, Monitor) when is_record(Monitor, monitor) ->
+%%%%%%%%%%%%%%%% add_station() %%%%%%%%%%%%%%%%
+
+%% {X, Y} is used only for guards check purpose
+add_station(StationName, {X, Y}, Monitor) when is_record(Monitor, monitor), is_number(X), is_number(Y) ->
   Coordinates = {X, Y},
   MonitorMap = Monitor#monitor.stationToStationRecMap,
   case MonitorMap of
@@ -41,6 +45,9 @@ add_station(StationName, {X, Y}, Monitor) when is_record(Monitor, monitor) ->
 add_station(_, _, _) -> {error, "Invalid arguments!!! Expected call: add_station(StationName, {X, Y}, Monitor),
  where monitor is record of type 'monitor'"}.
 
+%%%%%%%%%%%%%%%% add_value() %%%%%%%%%%%%%%%%
+
+%% create new map with added measurement for monitor
 add_measurement(Measurement, Val, MeasurementsMap) when is_record(Measurement, measurement) ->
   case MeasurementsMap of
     #{Measurement := _} -> {error, lists:flatten(io:format("Map alredy contains key = ~p!!!", [Measurement]))};
@@ -48,8 +55,13 @@ add_measurement(Measurement, Val, MeasurementsMap) when is_record(Measurement, m
   end;
 add_measurement(_, _, _) -> {error, "add_measurement(): Invalid arguments!!!"}.
 
-%%add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor) ->
-add_value(Station, Datetime, Type, Val, Monitor) ->
+%% 1. check if station exists
+%% 2. get station coordinates
+%% 3. create measurement record
+%% 4. try to add new measurement
+%%  - error: pass error message
+%%  - no error: return new monitor instance with updated measurements map
+add_value(Station, Datetime, Type, Val, Monitor) when is_record(Monitor, monitor) ->
   MonitorStationsMap = Monitor#monitor.stationToStationRecMap,
   if
     not is_map_key(Station, MonitorStationsMap) ->
@@ -65,8 +77,9 @@ add_value(Station, Datetime, Type, Val, Monitor) ->
         {error, Message} -> {error, Message};
         NewMeasurementsMap -> Monitor#monitor{measurementToVal = NewMeasurementsMap}
       end
-  end.
-%%add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!"}.
+  end;
+
+add_value(_, _, _, _, _) -> {error, "add_value(): Invalid arguments!!!"}.
 %% remove_value() -> ok.
 %% get_one_value() -> ok.
 %% get_station_min() -> ok.

@@ -22,7 +22,6 @@ create_monitor_test() ->
 add_station_test() ->
   M1 = pollution:create_monitor(),
   M2 = pollution:add_station("Stacja 1", {1,1}, M1),
-  io:format("Monitor = ~p~n", [M2]),
   ?assertNotMatch({error, _}, M2),
   ?assertMatch({error, _}, pollution:add_station("Stacja 1", {1,1}, M2)),
   ?assertMatch({error, _}, pollution:add_station("Stacja 1", {2,2}, M2)),
