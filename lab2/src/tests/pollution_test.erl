@@ -228,3 +228,28 @@ get_daily_mean_fail_test() ->
 
   ?assertMatch({error, _}, pollution:get_daily_mean("PM25",{2023,3,27}, M2)),
   ?assertMatch({error, _}, pollution:get_daily_mean("PM10",{2023,3,29}, M2)).
+
+get_maximum_gradient_stations_test() ->
+  Type = "PM10",
+  Date = {2023, 3, 27},
+  M = pollution:add_station("Stacja 3", {3,3}, pollution:add_station("Stacja 2", {2,2}, pollution:add_station("Stacja 1", {1,1}, pollution:create_monitor()))),
+  M1 = pollution:add_value("Stacja 1", {Date,{11,16,10}}, Type, 5, M),
+  M2 = pollution:add_value("Stacja 2", {Date,{11,16,11}}, Type, 20, M1),
+  M3 = pollution:add_value("Stacja 1", {Date,{11,16,12}}, Type, 10, M2),
+  M4 = pollution:add_value("Stacja 2", {Date,{11,16,13}}, Type, 25, M3),
+
+  M5 = pollution:add_value("Stacja 1", {Date,{11,16,14}}, "PM25", 100, M4),
+  M6 = pollution:add_value("Stacja 2", {Date,{11,16,15}}, "PM25", 220, M5),
+
+  M7 = pollution:add_value("Stacja 1", {{2023,3,28},{11,16,16}}, Type, 2000, M6),
+  M8 = pollution:add_value("Stacja 2", {{2023,3,28},{11,16,17}}, Type, 3000, M7),
+
+  M9 = pollution:add_value("Stacja 3", {Date,{11,16,18}}, Type, 30, M8),
+  M10 = pollution:add_value("Stacja 1", {Date,{11,16,19}}, Type, 15, M9),
+  M11 = pollution:add_value("Stacja 2", {Date,{11,16,20}}, Type, 30, M10),
+
+  pollution:get_maximum_gradient_stations(Type, Date, M11).
+
+%%  ?assertMatch(15.0, pollution:get_daily_mean("PM10",{2023,3,27}, M2)),
+%%  ?assertMatch(15.0, pollution:get_daily_mean("PM10",{2023,3,27}, M6)),
+%%  ?assertMatch(258.8, pollution:get_daily_mean("PM10",{2023,3,27}, M9)).

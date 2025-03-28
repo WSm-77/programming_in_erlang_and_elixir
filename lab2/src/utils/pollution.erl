@@ -12,7 +12,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([create_monitor/0, add_station/3, test/0, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3, get_station_min/3]).
+-export([create_monitor/0, add_station/3, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3, get_station_min/3, get_maximum_gradient_stations/3]).
 
 %% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
 %% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
@@ -173,4 +173,19 @@ get_daily_mean(Type, Date, Monitor) when is_record(Monitor, monitor) ->
 
 get_daily_mean(_, _, _) -> {error, "get_daily_mean(): Invalid arguments!!!~n"}.
 
-test() -> #monitor{}.
+get_maximum_gradient_stations(Type, Date, Monitor) when is_record(Monitor, monitor) ->
+  io:format("~p~n", [Monitor]),
+  maps:fold(
+    fun (Measurement, Value, Acc) ->
+      case Measurement of
+        #measurement{stationCoordinates = StationCoordinates, datetime = {Date, _}, type = Type} ->
+          Acc#{StationCoordinates => maps:get(StationCoordinates, Acc, []) ++ [Value]};
+        _ ->
+          Acc
+      end
+    end,
+    #{},
+    Monitor#monitor.measurementToVal
+  );
+
+get_maximum_gradient_stations(_, _, _) -> {error, "get_maximum_gradient_stations(): Invalid arguments!!!~n"}.
