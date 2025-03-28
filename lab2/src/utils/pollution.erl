@@ -173,9 +173,26 @@ get_daily_mean(Type, Date, Monitor) when is_record(Monitor, monitor) ->
 
 get_daily_mean(_, _, _) -> {error, "get_daily_mean(): Invalid arguments!!!~n"}.
 
-get_maximum_gradient_stations(Type, Date, Monitor) when is_record(Monitor, monitor) ->
-  io:format("~p~n", [Monitor]),
+calc_distance({X1, Y1}, {X2, Y2}) ->
+  Dx = X1 - X2,
+  Dy = Y1 - Y2,
+  math:sqrt(Dx * Dx + Dy * Dy).
+
+get_key_with_highest_value(Map) ->
   maps:fold(
+    fun (Key, Value, {MaxK, MaxV}) ->
+      if
+        MaxK =:= error; MaxV < Value -> {Key, Value};
+        true -> {MaxK, MaxV}
+      end
+    end,
+    {error, 0},
+    Map
+  ).
+
+get_maximum_gradient_stations(Type, Date, Monitor) when is_record(Monitor, monitor) ->
+%%  io:format("~p~n", [Monitor]),
+  StationsDailyMeasurementsMap = maps:fold(
     fun (Measurement, Value, Acc) ->
       case Measurement of
         #measurement{stationCoordinates = StationCoordinates, datetime = {Date, _}, type = Type} ->
@@ -186,6 +203,34 @@ get_maximum_gradient_stations(Type, Date, Monitor) when is_record(Monitor, monit
     end,
     #{},
     Monitor#monitor.measurementToVal
-  );
+  ),
+  StationsMinMaxMeasurementsMap = maps:map(
+    fun (_Key, ValuesList) ->
+      {lists:min(ValuesList), lists:max(ValuesList)}
+    end,
+    StationsDailyMeasurementsMap
+  ),
+  StationCoordinatesList = maps:fold(
+    fun (K, _V, Acc) -> Acc ++ [K] end,
+    [],
+    StationsDailyMeasurementsMap
+  ),
+  CoordinatesPairs = [{Coord1, Coord2} || Coord1 <- StationCoordinatesList, Coord2 <- StationCoordinatesList, Coord1 =/= Coord2],
+  CoordPairToGradient = lists:foldl(
+    fun ({Coord1, Coord2}, Acc) ->
+      {Min1, _} = maps:get(Coord1, StationsMinMaxMeasurementsMap),
+      {_, Max2} = maps:get(Coord2, StationsMinMaxMeasurementsMap),
+      Gradient = abs(Max2 - Min1) / calc_distance(Coord1, Coord2),
+      #station{name = Station1} = maps:get(Coord1, Monitor#monitor.stationToStationRecMap),
+      #station{name = Station2} = maps:get(Coord2, Monitor#monitor.stationToStationRecMap),
+      Acc#{{Station1, Station2} => Gradient}
+    end,
+    #{},
+    CoordinatesPairs
+  ),
+  case get_key_with_highest_value(CoordPairToGradient) of
+    {error, _} -> {error, "No gradient found!!!~n"};
+    {StationsPair, _} -> StationsPair
+  end;
 
 get_maximum_gradient_stations(_, _, _) -> {error, "get_maximum_gradient_stations(): Invalid arguments!!!~n"}.
