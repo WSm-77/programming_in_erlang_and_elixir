@@ -12,7 +12,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([create_monitor/0, add_station/3, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3, get_station_min/3, get_maximum_gradient_stations/3]).
+-export([create_monitor/0, add_station/3, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3, get_station_min/3, get_maximum_gradient_stations/3, get_station_mean/3]).
 
 %% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
 %% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
@@ -20,6 +20,7 @@
 %% remove_value/4 - usuwa odczyt ze stacji (współrzędne geograficzne lub nazwa stacji, data, typ pomiaru), zwraca zaktualizowany monitor;
 %% get_one_value/4 - zwraca wartość pomiaru z zadanej stacji o zadanym typie i z zadanej daty;
 %% get_station_min/3 - zwraca minimalną wartość parametru z zadanej stacji i danego typu;
+%% get_station_mean/3 - zwraca wartość średnią parametru z zadanej stacji i danego typu;
 %% get_daily_mean/3 - zwraca średnią wartość parametru danego typu, danego dnia na wszystkich stacjach;
 
 get_station_coordinates(Station, Monitor) ->
@@ -155,6 +156,28 @@ get_station_min(Station, Type, Monitor) when is_record(Monitor, monitor) ->
   end;
 get_station_min(_, _, _) -> {error, "get_station_min(): Inavalid arguments!!!~n"}.
 
+get_station_mean(Station, Type, Monitor) when is_record(Monitor, monitor) ->
+  case get_station_coordinates(Station, Monitor) of
+    {error, Message} -> {error, Message};
+    StationCoordinates ->
+      Values = maps:fold(
+        fun (K, V, Acc) ->
+          case K of
+            #measurement{stationCoordinates = StationCoordinates, type = Type} ->
+              Acc ++ [V];
+            _ -> Acc
+          end
+        end,
+        [],
+        Monitor#monitor.measurementToVal
+      ),
+      case length(Values) of
+        0 -> {error, lists:flatten(io_lib:format("Station ~p does not have measurements of type ~p!!!~n", [Station, Type]))};
+        _ -> lists:sum(Values) / length(Values)
+      end
+  end;
+get_station_mean(_, _, _) -> {error, "get_station_mean(): Inavalid arguments!!!~n"}.
+
 get_daily_mean(Type, Date, Monitor) when is_record(Monitor, monitor) ->
   Values = maps:fold(
     fun (K, V, Acc) ->
@@ -228,6 +251,7 @@ get_maximum_gradient_stations(Type, Date, Monitor) when is_record(Monitor, monit
     #{},
     CoordinatesPairs
   ),
+%%  io:format("~p~n", [CoordPairToGradient]),
   case get_key_with_highest_value(CoordPairToGradient) of
     {error, _} -> {error, "No gradient found!!!~n"};
     {StationsPair, _} -> StationsPair

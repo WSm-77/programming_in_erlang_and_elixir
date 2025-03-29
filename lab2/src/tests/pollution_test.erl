@@ -11,6 +11,7 @@
 -author("Wojciech Turek").
 
 -include_lib("eunit/include/eunit.hrl").
+-export([run_all_tests/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 create_monitor_test() ->
@@ -244,12 +245,30 @@ get_maximum_gradient_stations_test() ->
   M7 = pollution:add_value("Stacja 1", {{2023,3,28},{11,16,16}}, Type, 2000, M6),
   M8 = pollution:add_value("Stacja 2", {{2023,3,28},{11,16,17}}, Type, 3000, M7),
 
-  M9 = pollution:add_value("Stacja 3", {Date,{11,16,18}}, Type, 30, M8),
+  M9 = pollution:add_value("Stacja 3", {Date,{11,16,18}}, Type, 50, M8),
   M10 = pollution:add_value("Stacja 1", {Date,{11,16,19}}, Type, 15, M9),
-  M11 = pollution:add_value("Stacja 2", {Date,{11,16,20}}, Type, 30, M10),
+  M11 = pollution:add_value("Stacja 2", {Date,{11,16,20}}, Type, 100, M10),
 
-  pollution:get_maximum_gradient_stations(Type, Date, M11).
+  ?assertMatch({"Stacja 1","Stacja 2"}, pollution:get_maximum_gradient_stations(Type, Date, M4)),
+  ?assertMatch({"Stacja 1","Stacja 2"}, pollution:get_maximum_gradient_stations(Type, Date, M8)),
+  ?assertMatch({"Stacja 2","Stacja 3"}, pollution:get_maximum_gradient_stations(Type, Date, M9)),
+  ?assertMatch({"Stacja 1","Stacja 2"}, pollution:get_maximum_gradient_stations(Type, Date, M11)).
 
-%%  ?assertMatch(15.0, pollution:get_daily_mean("PM10",{2023,3,27}, M2)),
-%%  ?assertMatch(15.0, pollution:get_daily_mean("PM10",{2023,3,27}, M6)),
-%%  ?assertMatch(258.8, pollution:get_daily_mean("PM10",{2023,3,27}, M9)).
+run_all_tests() ->
+  create_monitor_test(),
+  add_station_test(),
+  add_value_test(),
+  add_value_fail_test(),
+  add_value_non_existing_station_test(),
+  remove_value_test(),
+  remove_value_and_add_back_test(),
+  remove_value_fail_test(),
+  get_one_value_test(),
+  get_one_value_fail_test(),
+  get_station_mean_test(),
+  get_station_min_test(),
+  get_station_min_fail_test(),
+  get_station_mean_fail_test(),
+  get_daily_mean_test(),
+  get_daily_mean_fail_test(),
+  get_maximum_gradient_stations_test().
