@@ -14,14 +14,15 @@
 %% API
 -export([create_monitor/0, add_station/3, add_value/5, remove_value/4, get_one_value/4, get_daily_mean/3, get_station_min/3, get_maximum_gradient_stations/3, get_station_mean/3]).
 
-%% create_monitor/0 - tworzy i zwraca nowy monitor zanieczyszczeń;
-%% add_station/3 - dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
-%% add_value/5 - dodaje odczyt ze stacji (współrzędne geograficzne lub nazwa stacji, data, typ pomiaru, wartość), zwraca zaktualizowany monitor;
-%% remove_value/4 - usuwa odczyt ze stacji (współrzędne geograficzne lub nazwa stacji, data, typ pomiaru), zwraca zaktualizowany monitor;
-%% get_one_value/4 - zwraca wartość pomiaru z zadanej stacji o zadanym typie i z zadanej daty;
-%% get_station_min/3 - zwraca minimalną wartość parametru z zadanej stacji i danego typu;
-%% get_station_mean/3 - zwraca wartość średnią parametru z zadanej stacji i danego typu;
-%% get_daily_mean/3 - zwraca średnią wartość parametru danego typu, danego dnia na wszystkich stacjach;
+%% create_monitor/0 - creates and returns a new pollution monitor;
+%% add_station/3 - adds a measurement station entry to the monitor (name and geographic coordinates), returns the updated monitor;
+%% add_value/5 - adds a reading from the station (geographic coordinates or station name, date, measurement type, value), returns the updated monitor;
+%% remove_value/4 - removes a reading from the station (geographic coordinates or station name, date, measurement type), returns the updated monitor;
+%% get_one_value/4 - returns the measurement value from the specified station of the specified type and date;
+%% get_station_min/3 - returns the minimum value of a parameter from the specified station and type;
+%% get_station_mean/3 - returns the average value of a parameter from the specified station and type;
+%% get_daily_mean/3 - returns the average value of a specified parameter type on a specified day across all stations;
+
 
 get_station_coordinates(Station, Monitor) ->
   case maps:get(Station, Monitor#monitor.stationToStationRecMap, error) of
