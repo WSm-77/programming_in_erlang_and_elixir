@@ -130,35 +130,40 @@ remove_value_fail_test() ->
   ok.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%get_one_value_test() ->
-%%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
-%%  Time = calendar:local_time(),
-%%  M1 = pollution_server:add_value("Stacja 1", Time, "PM10", 46.3, M),
-%%  M2 = pollution_server:add_value("Stacja 1", Time, "PM1", 36.3, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 26.3, M2),
-%%
-%%  ?assertMatch(46.3, pollution_server:get_one_value("Stacja 1", Time, "PM10", M3)),
-%%  ?assertMatch(36.3, pollution_server:get_one_value("Stacja 1", Time, "PM1", M3)),
-%%  ?assertMatch(46.3, pollution_server:get_one_value({1,1}, Time, "PM10", M3)),
-%%  ?assertMatch(26.3, pollution_server:get_one_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", M3)).
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%get_one_value_fail_test() ->
-%%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
-%%  Time = calendar:local_time(),
-%%  M1 = pollution_server:add_value("Stacja 1", Time, "PM10", 46.3, M),
-%%  M2 = pollution_server:add_value("Stacja 1", Time, "PM1", 36.3, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 26.3, M2),
-%%
-%%  ?assertMatch({error, _}, pollution_server:get_one_value("Stacja 1", Time, "PM25", M3)),
-%%  ?assertMatch({error, _}, pollution_server:get_one_value({1,1}, Time, "PM25", M3)),
-%%  ?assertMatch({error, _}, pollution_server:get_one_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10", M3)),
-%%  ?assertMatch({error, _}, pollution_server:get_one_value("Stacja 2", Time, "PM1", M3)),
-%%  ?assertMatch({error, _}, pollution_server:get_one_value({1,2}, Time, "PM10", M3)).
-%%
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_one_value_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  Time = calendar:local_time(),
+  pollution_server:add_value("Stacja 1", Time, "PM10", 46.3),
+  pollution_server:add_value("Stacja 1", Time, "PM1", 36.3),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 26.3),
+
+  ?assertMatch(46.3, pollution_server:get_one_value("Stacja 1", Time, "PM10")),
+  ?assertMatch(36.3, pollution_server:get_one_value("Stacja 1", Time, "PM1")),
+  ?assertMatch(46.3, pollution_server:get_one_value({1,1}, Time, "PM10")),
+  ?assertMatch(26.3, pollution_server:get_one_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10")),
+  pollution_server:stop(),
+  ok.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_one_value_fail_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  Time = calendar:local_time(),
+  pollution_server:add_value("Stacja 1", Time, "PM10", 46.3),
+  pollution_server:add_value("Stacja 1", Time, "PM1", 36.3),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 26.3),
+
+  ?assertMatch({error, _}, pollution_server:get_one_value("Stacja 1", Time, "PM25")),
+  ?assertMatch({error, _}, pollution_server:get_one_value({1,1}, Time, "PM25")),
+  ?assertMatch({error, _}, pollution_server:get_one_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10")),
+  ?assertMatch({error, _}, pollution_server:get_one_value("Stacja 2", Time, "PM1")),
+  ?assertMatch({error, _}, pollution_server:get_one_value({1,2}, Time, "PM10")),
+  pollution_server:stop(),
+  ok.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%get_station_mean_test() ->
 %%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
@@ -266,7 +271,7 @@ remove_value_fail_test() ->
 %%  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations(Type, Date, M8)),
 %%  ?assertMatch({"Stacja 2","Stacja 3"}, pollution_server:get_maximum_gradient_stations(Type, Date, M9)),
 %%  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations(Type, Date, M11)).
-%%
+
 %%run_all_tests() ->
 %%  create_monitor_test(),
 %%  add_station_test(),
