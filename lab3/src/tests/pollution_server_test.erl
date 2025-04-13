@@ -10,7 +10,7 @@
 -author("wiktor").
 
 -include_lib("eunit/include/eunit.hrl").
-%%-export([run_all_tests/0]).
+-export([run_all_tests/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 add_station_test() ->
@@ -276,45 +276,51 @@ get_daily_mean_fail_test() ->
   pollution_server:stop(),
   ok.
 
-%%get_maximum_gradient_stations_test() ->
-%%  Type = "PM10",
-%%  Date = {2023, 3, 27},
-%%  M = pollution_server:add_station("Stacja 3", {3,3}, pollution_server:add_station("Stacja 2", {2,2}, pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()))),
-%%  M1 = pollution_server:add_value("Stacja 1", {Date,{11,16,10}}, Type, 5, M),
-%%  M2 = pollution_server:add_value("Stacja 2", {Date,{11,16,11}}, Type, 20, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {Date,{11,16,12}}, Type, 10, M2),
-%%  M4 = pollution_server:add_value("Stacja 2", {Date,{11,16,13}}, Type, 25, M3),
-%%
-%%  M5 = pollution_server:add_value("Stacja 1", {Date,{11,16,14}}, "PM25", 100, M4),
-%%  M6 = pollution_server:add_value("Stacja 2", {Date,{11,16,15}}, "PM25", 220, M5),
-%%
-%%  M7 = pollution_server:add_value("Stacja 1", {{2023,3,28},{11,16,16}}, Type, 2000, M6),
-%%  M8 = pollution_server:add_value("Stacja 2", {{2023,3,28},{11,16,17}}, Type, 3000, M7),
-%%
-%%  M9 = pollution_server:add_value("Stacja 3", {Date,{11,16,18}}, Type, 50, M8),
-%%  M10 = pollution_server:add_value("Stacja 1", {Date,{11,16,19}}, Type, 15, M9),
-%%  M11 = pollution_server:add_value("Stacja 2", {Date,{11,16,20}}, Type, 100, M10),
-%%
-%%  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations(Type, Date, M4)),
-%%  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations(Type, Date, M8)),
-%%  ?assertMatch({"Stacja 2","Stacja 3"}, pollution_server:get_maximum_gradient_stations(Type, Date, M9)),
-%%  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations(Type, Date, M11)).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_maximum_gradient_stations_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 3", {3,3}),
+  pollution_server:add_station("Stacja 2", {2,2}),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10", 5),
+  pollution_server:add_value("Stacja 2", {{2023,3,27},{11,16,11}}, "PM10", 20),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,12}}, "PM10", 10),
+  pollution_server:add_value("Stacja 2", {{2023,3,27},{11,16,13}}, "PM10", 25),
 
-%%run_all_tests() ->
-%%  create_monitor_test(),
-%%  add_station_test(),
-%%  add_value_test(),
-%%  add_value_fail_test(),
-%%  add_value_non_existing_station_test(),
-%%  remove_value_test(),
-%%  remove_value_and_add_back_test(),
-%%  remove_value_fail_test(),
-%%  get_one_value_test(),
-%%  get_one_value_fail_test(),
-%%  get_station_mean_test(),
-%%  get_station_min_test(),
-%%  get_station_min_fail_test(),
-%%  get_station_mean_fail_test(),
-%%  get_daily_mean_test(),
-%%  get_daily_mean_fail_test(),
-%%  get_maximum_gradient_stations_test().
+  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations("PM10", {2023,3,27})),
+
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,14}}, "PM25", 100),
+  pollution_server:add_value("Stacja 2", {{2023,3,27},{11,16,15}}, "PM25", 220),
+  pollution_server:add_value("Stacja 1", {{2023,3,28},{11,16,16}}, "PM10", 2000),
+  pollution_server:add_value("Stacja 2", {{2023,3,28},{11,16,17}}, "PM10", 3000),
+
+  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations("PM10", {2023,3,27})),
+
+  pollution_server:add_value("Stacja 3", {{2023,3,27},{11,16,18}}, "PM10", 50),
+
+  ?assertMatch({"Stacja 2","Stacja 3"}, pollution_server:get_maximum_gradient_stations("PM10", {2023,3,27})),
+
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,19}}, "PM10", 15),
+  pollution_server:add_value("Stacja 2", {{2023,3,27},{11,16,20}}, "PM10", 100),
+
+  ?assertMatch({"Stacja 1","Stacja 2"}, pollution_server:get_maximum_gradient_stations("PM10", {2023,3,27})),
+  pollution_server:stop(),
+  ok.
+
+run_all_tests() ->
+  add_station_test(),
+  add_value_test(),
+  add_value_fail_test(),
+  add_value_non_existing_station_test(),
+  remove_value_test(),
+  remove_value_and_add_back_test(),
+  remove_value_fail_test(),
+  get_one_value_test(),
+  get_one_value_fail_test(),
+  get_station_mean_test(),
+  get_station_min_test(),
+  get_station_min_fail_test(),
+  get_station_mean_fail_test(),
+  get_daily_mean_test(),
+  get_daily_mean_fail_test(),
+  get_maximum_gradient_stations_test().
