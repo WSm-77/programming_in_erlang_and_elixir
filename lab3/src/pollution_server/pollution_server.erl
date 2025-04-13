@@ -14,7 +14,7 @@
 
 %% API
 -export([start/0, init/0, init/1]).
--export([add_station/2, get_monitor/0, start/1, stop/0, add_value/4, remove_value/3, get_one_value/3, get_station_mean/2, get_station_min/2]).
+-export([add_station/2, get_monitor/0, start/1, stop/0, add_value/4, remove_value/3, get_one_value/3, get_station_mean/2, get_station_min/2, get_daily_mean/2]).
 
 start() ->
   ServerPID = spawn(pollution_server, init, []),
@@ -125,3 +125,9 @@ get_station_mean(Station, Type) ->
   end.
 
 %% get_daily_mean/3 - returns the average value of a specified parameter type on a specified day across all stations;
+
+get_daily_mean(Type, Date) ->
+  server ! {get, self()},
+  receive
+    Monitor -> pollution:get_daily_mean(Type, Date, Monitor)
+  end.
