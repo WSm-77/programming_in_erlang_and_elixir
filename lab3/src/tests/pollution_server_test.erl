@@ -76,51 +76,60 @@ add_value_non_existing_station_test() ->
   ok.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%remove_value_test() ->
-%%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
-%%  Time = calendar:local_time(),
-%%  M1 = pollution_server:add_value("Stacja 1", Time, "PM10", 46.3, M),
-%%  M2 = pollution_server:add_value("Stacja 1", Time, "PM1", 46.3, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 46.3, M2),
-%%
-%%  M4 = pollution_server:remove_value("Stacja 1", Time, "PM10", M3),
-%%  ?assertNotMatch({error, _}, M4),
-%%  ?assertNotEqual(M4, M3),
-%%  M5 = pollution_server:remove_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", M4),
-%%  ?assertNotMatch({error, _}, M5),
-%%  ?assertNotEqual(M5, M4).
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%remove_value_and_add_back_test() ->
-%%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
-%%  Time = calendar:local_time(),
-%%  M1 = pollution_server:add_value("Stacja 1", Time, "PM10", 46.3, M),
-%%  M2 = pollution_server:add_value("Stacja 1", Time, "PM1", 46.3, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 46.3, M2),
-%%
-%%  M4 = pollution_server:remove_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", M3),
-%%  ?assertNotEqual(M4, M3),
-%%
-%%  M5 = pollution_server:add_value({1,1}, {{2023,3,27},{11,16,9}}, "PM10", 46.3, M4),
-%%  ?assertEqual(M5, M3).
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%remove_value_fail_test() ->
-%%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
-%%  Time = calendar:local_time(),
-%%  M1 = pollution_server:add_value("Stacja 1", Time, "PM10", 46.3, M),
-%%  M2 = pollution_server:add_value("Stacja 1", Time, "PM1", 46.3, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 46.3, M2),
-%%
-%%  ?assertMatch({error, _}, pollution_server:remove_value("Stacja 1", Time, "PM25", M3)),
-%%  ?assertMatch({error, _}, pollution_server:remove_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10", M3)),
-%%  ?assertMatch({error, _}, pollution_server:remove_value({1,2}, Time, "PM10", M3)),
-%%  ?assertMatch({error, _}, pollution_server:remove_value("Stacja 2", Time, "PM10", M3)).
-%%
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+remove_value_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  Time = calendar:local_time(),
+  pollution_server:add_value("Stacja 1", Time, "PM10", 46.3),
+  pollution_server:add_value("Stacja 1", Time, "PM1", 46.3),
+  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 46.3),
+
+  M4 = pollution_server:remove_value("Stacja 1", Time, "PM10"),
+  ?assertNotMatch({error, _}, M4),
+  ?assertNotEqual(M4, M3),
+  M5 = pollution_server:remove_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10"),
+  ?assertNotMatch({error, _}, M5),
+  ?assertNotEqual(M5, M4),
+  pollution_server:stop(),
+  ok.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+remove_value_and_add_back_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  Time = calendar:local_time(),
+  pollution_server:add_value("Stacja 1", Time, "PM10", 46.3),
+  pollution_server:add_value("Stacja 1", Time, "PM1", 46.3),
+  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 46.3),
+
+  M4 = pollution_server:remove_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10"),
+  ?assertNotEqual(M4, M3),
+
+  M5 = pollution_server:add_value({1,1}, {{2023,3,27},{11,16,9}}, "PM10", 46.3),
+  ?assertEqual(M5, M3),
+  pollution_server:stop(),
+  ok.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+remove_value_fail_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  Time = calendar:local_time(),
+  pollution_server:add_value("Stacja 1", Time, "PM10", 46.3),
+  pollution_server:add_value("Stacja 1", Time, "PM1", 46.3),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,9}}, "PM10", 46.3),
+
+  ?assertMatch({error, _}, pollution_server:remove_value("Stacja 1", Time, "PM25")),
+  ?assertMatch({error, _}, pollution_server:remove_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10")),
+  ?assertMatch({error, _}, pollution_server:remove_value({1,2}, Time, "PM10")),
+  ?assertMatch({error, _}, pollution_server:remove_value("Stacja 2", Time, "PM10")),
+  pollution_server:stop(),
+  ok.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%get_one_value_test() ->
 %%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),

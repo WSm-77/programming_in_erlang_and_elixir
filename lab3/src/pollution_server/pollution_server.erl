@@ -14,7 +14,7 @@
 
 %% API
 -export([start/0, init/0, init/1]).
--export([add_station/2, get_monitor/0, start/1, stop/0, add_value/4]).
+-export([add_station/2, get_monitor/0, start/1, stop/0, add_value/4, remove_value/3]).
 
 start() ->
   ServerPID = spawn(pollution_server, init, []),
@@ -85,6 +85,21 @@ handle_add_value(Station, Datetime, Type, Val, Monitor) ->
   end.
 
 %% remove_value/4 - removes a reading from the station (geographic coordinates or station name, date, measurement type);
+
+remove_value(Station, Datetime, Type) ->
+  server ! {get, self()},
+  receive
+    Monitor -> handle_remove_value(Station, Datetime, Type, Monitor)
+  end.
+
+handle_remove_value(Station, Datetime, Type, Monitor) ->
+  case pollution:remove_value(Station, Datetime, Type, Monitor) of
+    {error, Message} -> {error, Message};
+    NewMonitor ->
+      server ! {update, NewMonitor},
+      NewMonitor
+  end.
+
 %% get_one_value/4 - returns the measurement value from the specified station of the specified type and date;
 %% get_station_min/3 - returns the minimum value of a parameter from the specified station and type;
 %% get_station_mean/3 - returns the average value of a parameter from the specified station and type;
