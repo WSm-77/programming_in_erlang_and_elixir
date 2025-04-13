@@ -164,18 +164,26 @@ get_one_value_fail_test() ->
   pollution_server:stop(),
   ok.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%get_station_mean_test() ->
-%%  M = pollution_server:add_station("Stacja 1", {1,1}, pollution_server:create_monitor()),
-%%  M1 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10", 10, M),
-%%  M2 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,11}}, "PM10", 20, M1),
-%%  M3 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,12}}, "PM10", 10, M2),
-%%  M4 = pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,13}}, "PM10", 20, M3),
-%%
-%%  ?assertMatch(15.0, pollution_server:get_station_mean("Stacja 1", "PM10", M2)),
-%%  ?assertMatch(15.0, pollution_server:get_station_mean({1,1}, "PM10", M4)),
-%%  ?assertMatch(40/3, pollution_server:get_station_mean("Stacja 1", "PM10", M3)).
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_station_mean_test() ->
+  pollution_server:start(),
+  pollution_server:add_station("Stacja 1", {1,1}),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,10}}, "PM10", 10),
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,11}}, "PM10", 20),
+
+  ?assertMatch(15.0, pollution_server:get_station_mean("Stacja 1", "PM10")),
+
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,12}}, "PM10", 10),
+
+  ?assertMatch(40/3, pollution_server:get_station_mean("Stacja 1", "PM10")),
+
+  pollution_server:add_value("Stacja 1", {{2023,3,27},{11,16,13}}, "PM10", 20),
+
+  ?assertMatch(15.0, pollution_server:get_station_mean({1,1}, "PM10")),
+
+  pollution_server:stop(),
+  ok.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %%get_station_min_test() ->
