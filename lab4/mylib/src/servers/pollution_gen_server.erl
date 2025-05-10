@@ -13,7 +13,7 @@
 -include("pollution/pollutionRecords.hrl").
 
 %% API
--export([init/1, handle_call/3, handle_cast/2, start_link/0, restart/0]).
+-export([init/1, handle_call/3, handle_cast/2, start_link/0, restart/0, crash/0]).
 -export([get_monitor/0, add_station/2, add_value/4, remove_value/3, get_one_value/3, get_station_min/2, get_station_mean/2, get_daily_mean/2, get_maximum_gradient_stations/2]).
 
 %%-export([add_station/2, get_monitor/0, add_value/4, remove_value/3, get_one_value/3, get_station_mean/2,
@@ -27,6 +27,9 @@ init(Monitor) ->
 
 restart() ->
   gen_server:cast(?MODULE, restart).
+
+crash() ->
+  gen_server:call(?MODULE, crash).
 
 error_checker({error, Message}, Monitor) ->
   {reply, {error, Message}, Monitor};
@@ -83,11 +86,7 @@ handle_call({get_maximum_gradient_stations, Type, Date}, _From, Monitor) ->
   error_checker(
     pollution:get_maximum_gradient_stations(Type, Date, Monitor),
     Monitor
-  );
-
-handle_call(Request, From, Monitor) ->
-  Message = io_lib:format("Call: Invalid request: ~p, From: ~p~n", [Request, From]),
-  {reply, Message, Monitor}.
+  ).
 
 handle_cast(restart, _Monitor) ->
   {noreply, pollution:create_monitor()};
