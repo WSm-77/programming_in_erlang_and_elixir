@@ -1,0 +1,271 @@
+# 🧪 Learn Elixir: Tasks for Erlang Developers
+
+## Section
+
+Welcome! These tasks are designed to help you get comfortable with **Elixir syntax** using **Livebook**.
+
+You already know Erlang, so we’ll focus on idioms, the pipe operator, macros, and Elixir conveniences.
+
+---
+
+## ✅ Task 1: Basic Syntax & Functions
+
+```elixir
+# Define a module `MathOps` with:
+# - add/2
+# - subtract/2
+# - is_even/1 (use `rem` and guard)
+
+defmodule MathOps do
+  def add(a, b), do: a + b
+  def subtract(a, b), do: a - b
+  def is_even(a), do: rem(a, 2) == 0
+end
+
+# Example calls:
+IO.puts(MathOps.add(2, 3))        #=> 5
+IO.puts(MathOps.is_even(4))       #=> true
+```
+
+---
+
+## ✅ Task 2: Pipe Operator (`|>`)
+
+```elixir
+# Create a module `StringOps` with:
+# - reverse_and_upcase/1: reverses a string and upcases it
+# Use pipelines!
+
+defmodule StringOps do
+  def reverse_and_upcase(str) do
+    str |> String.upcase |> String.reverse
+  end
+end
+
+# Example:
+StringOps.reverse_and_upcase("hello")  #=> "OLLEH"
+```
+
+---
+
+## ✅ Task 3: Pattern Matching with `case` and `with`
+
+```elixir
+# Create a function that:
+# - takes a map %{name: ..., age: ...}
+# - returns "Welcome, <name>" if age >= 18
+# - returns "Too young" otherwise
+
+defmodule AgeChecker do
+  def check_age(map_arg) do
+    with %{name: name, age: age} <- map_arg do
+      if age >= 18 do
+        "Welcome #{name}"
+      else
+        "Too young"
+      end
+    end
+  end
+end
+
+# Bonus: Write a `with` clause that extracts :name and :age
+AgeChecker.check_age(%{name: "Tom", age: 50}) |> IO.puts
+AgeChecker.check_age(%{name: "Bob", age: 16}) |> IO.puts
+```
+
+---
+
+## ✅ Task 4: List Comprehensions and Enum
+
+```elixir
+# Given a list of numbers:
+# - Double only the even ones
+# - Return a new list
+
+defmodule ListComp do
+  def double_even(list) when is_list(list) do
+    for x <- list do
+      if rem(x, 2) == 0 do
+        2 * x
+      else
+        x
+      end
+    end
+  end
+end
+
+# Use list comprehension or Enum.filter + Enum.map
+ListComp.double_even(Enum.to_list(1..8))
+```
+
+---
+
+## ✅ Task 5: Structs and Pattern Matching
+
+```elixir
+# Define a struct: %User{name: "", age: 0}
+# Write a function greet_user/1:
+# - Returns "Hi, <name>" if age > 12
+# - Returns "Hello, kid" otherwise
+
+defmodule User do
+  defstruct [:name, :age]
+end
+```
+
+---
+
+```elixir
+%User{name: "", age: 0}
+```
+
+## ✅ Task 6: Recursion (Then Enum)
+
+```elixir
+# Recursive sum of list: sum([1, 2, 3]) => 6
+# Then rewrite using Enum.sum
+
+defmodule Sum do
+  def sum([]), do: 0
+  def sum([head | tail]), do: head + sum(tail)
+end
+
+Sum.sum([1,2,3])
+```
+
+---
+
+## ✅ Task 7: Custom Guards
+
+```elixir
+# Define a custom guard is_adult(age)
+# Use it in a function like greet/1
+
+defmodule MyGuards do
+  defguard is_adult(age) when is_integer(age) and age >= 18
+end
+
+defmodule Greet do
+  import MyGuards, only: [is_adult: 1]
+  
+  def greet(age) when is_adult(age), do: "Your adult"
+  def greet(_age), do: "Your child"
+end
+
+Greet.greet(20) |> IO.puts
+Greet.greet(15) |> IO.puts
+```
+
+---
+
+## ✅ Task 8: Pattern Matching in Function Heads
+
+```elixir
+# Define factorial(n) using multiple heads:
+# - factorial(0) -> 1
+# - factorial(n) -> n * factorial(n - 1)
+
+defmodule Factorial do
+  def factorial(x) when x <= 0, do: 1
+  def factorial(x), do: x * factorial(x - 1)
+end
+
+Factorial.factorial(6) |> IO.puts
+```
+
+---
+
+## ✅ Task 9: Keyword Lists & Options
+
+```elixir
+# Define a function greet(name, opts \ [])
+# opts can include :greeting (default: "Hello")
+
+# greet("John") => "Hello, John"
+# greet("Jane", greeting: "Hi") => "Hi, Jane"
+
+defmodule GreetingOpts do
+  def greet(name, opts \\ []) do
+    defaults = [greeting: "Hello", endstr: ""]
+    opts = Keyword.merge(defaults, opts)
+
+    greeting = Keyword.get(opts, :greeting)
+    endstr = Keyword.get(opts, :endstr)
+
+    "#{greeting}, #{name}#{endstr}"
+  end
+end
+
+GreetingOpts.greet("John") |> IO.puts
+GreetingOpts.greet("John", greeting: "Hi") |> IO.puts
+GreetingOpts.greet("John", greeting: "Hi", endstr: ".") |> IO.puts
+```
+
+---
+
+## ✅ Task 10: Module Docs and `h`
+
+```elixir
+# Create a module with @moduledoc
+# Add @doc to functions
+# Call h(Module) and h(Module.function) in Livebook
+
+defmodule MathUtils do
+  @moduledoc """
+  Provides basic math operations.
+
+  This module contains functions for addition, subtraction and even check.
+
+  ## Examples
+
+      iex> MathOps.add(2, 3)
+      5
+    
+      iex> MathOps.subtract(2, 3)
+      -1
+    
+      iex> MathOps.is_even(6)
+      true
+    
+      iex> MathOps.is_even(7)
+      false
+  """
+
+  @doc """
+  Adds two numbers.
+
+  ## Examples
+
+        iex> MathUtils.add(2,5)
+        7
+  """
+  def add(a, b), do: a + b
+
+  @doc """
+  Subtracts two numbers.
+
+  ## Examples
+
+      iex> MathUtils.subtract(2,5)
+      -3
+  """
+  def subtract(a, b), do: a - b
+
+  @doc """
+  Subtracts two numbers.
+
+  ## Examples
+
+      iex> MathUtils.is_even(6)
+      true
+
+      iex> MathUtils.is_even(7)
+      false
+  """
+  def is_even(a), do: rem(a, 2) == 0
+end
+```
+
+---
+
+Happy hacking with Elixir! 🚀
