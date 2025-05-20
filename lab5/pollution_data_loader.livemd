@@ -167,10 +167,6 @@ stations_list |> length
 ### Integration with pollution_app
 
 ```elixir
-Application.stop(:mylib)
-```
-
-```elixir
 Application.start(:mylib)
 ```
 
@@ -181,11 +177,6 @@ Application.start(:mylib)
 ```
 
 #### 1. Create Stations
-
-```elixir
-# TODO: remove
-:pollution_gen_server.restart()
-```
 
 ```elixir
 time_us =
@@ -206,11 +197,11 @@ elem(0)
 time_ms = time_us  / 1_000_000
 ```
 
+### 2. Filter measurements from invalid stations
+
 ```elixir
 data_lines |> length
 ```
-
-### 2. Filter measurements from invalid stations
 
 ```elixir
 {:monitor, stations_map, _} = :pollution_gen_server.get_monitor()
@@ -240,6 +231,8 @@ time_s = time_us / 1_000_000
 
 ```elixir
 time_us = :timer.tc(&PollutionDataLoader.add_values/1, [data_lines]) |> elem(0)
+
+time_s = time_us / 1_000_000
 ```
 
 ### 4. Analyze data
@@ -259,8 +252,4 @@ IO.puts("exec time: #{time_us / 1_000_000} [s]")
 IO.puts("result: #{result}")
 ```
 
-```elixir
-:pollution_gen_server.get_daily_mean("PM25", {2024, 2, 10})
-```
-
-<!-- livebook:{"offset":6366,"stamp":{"token":"XCP.UMqHnSFe6V0i8V_cLNlf6yDXaenzgtYSnha2JhPj0muAwf0_jKmNJgPCKdr8G7QEj553DMYiB5UprmYHnZ0P-zezVKnVKsdrSZ5ZF3Mq9RIYzN9Ze8886NRUV2UY4i7SbMr7-6pd5NfWZCM","version":2}} -->
+<!-- livebook:{"offset":6219,"stamp":{"token":"XCP.d3Cb2ZkOZKVgF2Cl0juaNmFEzaDoeXcicZwJssQ74bsqaK0WkkBiDQOcq7n68pigpRu_eE9RDVF0MUJyTrA9194Ko_a8qsUJDQdhQFYzdxXkvKylDZk_SRKI8TgAPT2QtzwLKADYORcqBUs","version":2}} -->
