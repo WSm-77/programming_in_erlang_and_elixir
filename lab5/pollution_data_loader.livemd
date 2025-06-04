@@ -252,4 +252,4 @@ IO.puts("exec time: #{time_us / 1_000_000} [s]")
 IO.puts("result: #{result}")
 ```
 
-<!-- livebook:{"offset":6219,"stamp":{"token":"XCP.d3Cb2ZkOZKVgF2Cl0juaNmFEzaDoeXcicZwJssQ74bsqaK0WkkBiDQOcq7n68pigpRu_eE9RDVF0MUJyTrA9194Ko_a8qsUJDQdhQFYzdxXkvKylDZk_SRKI8TgAPT2QtzwLKADYORcqBUs","version":2}} -->
+<!-- livebook:{"offset":6219,"stamp":{"token":"XCP.dFJfkK93FJ8PHszPIwFB-02iR0Tn8ehnarvhwPqDVTzGfWCgKHqpsqyJSaN_BEog1m9DIGA3mFYgmFaGdsoopPulhHBLypjSJXY9-Bf94mUUg_mVjgnp9FsIOp9s1o-Ous4JtaSD1VsnVJc","version":2}} -->
