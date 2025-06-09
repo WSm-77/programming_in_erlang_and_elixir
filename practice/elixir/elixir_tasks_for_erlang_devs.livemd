@@ -4,8 +4,6 @@
 
 Welcome! These tasks are designed to help you get comfortable with **Elixir syntax** using **Livebook**.
 
-You already know Erlang, so we’ll focus on idioms, the pipe operator, macros, and Elixir conveniences.
-
 ---
 
 ## ✅ Task 1: Basic Syntax & Functions
@@ -147,7 +145,7 @@ end
 
 defmodule Greet do
   import MyGuards, only: [is_adult: 1]
-  
+
   def greet(age) when is_adult(age), do: "Your adult"
   def greet(_age), do: "Your child"
 end
@@ -220,13 +218,13 @@ defmodule MathUtils do
 
       iex> MathOps.add(2, 3)
       5
-    
+
       iex> MathOps.subtract(2, 3)
       -1
-    
+
       iex> MathOps.is_even(6)
       true
-    
+
       iex> MathOps.is_even(7)
       false
   """
@@ -267,5 +265,3 @@ end
 ```
 
 ---
-
-Happy hacking with Elixir! 🚀

@@ -13,6 +13,7 @@
       <sourceFolder url="file://$MODULE_DIR$/lab2/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lab3/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/erlang_elixir/erlang/src" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Erlang 25.3.2.8" jdkType="Erlang SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
