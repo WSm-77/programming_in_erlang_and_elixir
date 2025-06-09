@@ -6,6 +6,7 @@ defmodule Pollutiondb.Station do
       field :name, :string
       field :lon, :float
       field :lat, :float
+      has_many :readings, Pollutiondb.Reading
   end
 
   def add(station) do
@@ -25,7 +26,7 @@ defmodule Pollutiondb.Station do
   end
 
   def find_by_name(name) do
-    Pollutiondb.Repo.all(
+    Pollutiondb.Repo.one(
       Ecto.Query.where(Pollutiondb.Station, name: ^name)
     )
   end
@@ -35,7 +36,7 @@ defmodule Pollutiondb.Station do
       where: s.lon == ^lon,
       where: s.lat == ^lat
     ) |>
-    Pollutiondb.Repo.all
+    Pollutiondb.Repo.one
   end
 
   def find_by_location_range(lon_min, lon_max, lat_min, lat_max) do
@@ -49,10 +50,10 @@ defmodule Pollutiondb.Station do
   defp changeset(station, changesmap) when is_map(changesmap) do
     Ecto.Changeset.cast(station, changesmap, Map.keys(changesmap))
     |> Ecto.Changeset.validate_required([:lat, :lon])
-    |> Ecto.Changeset.validate_number(:lat, greater_than_or_equal_to: 0)
-    |> Ecto.Changeset.validate_number(:lat, less_than_or_equal_to: 180)
     |> Ecto.Changeset.validate_number(:lon, greater_than_or_equal_to: 0)
-    |> Ecto.Changeset.validate_number(:lon, less_than_or_equal_to: 90)
+    |> Ecto.Changeset.validate_number(:lon, less_than_or_equal_to: 180)
+    |> Ecto.Changeset.validate_number(:lat, greater_than_or_equal_to: 0)
+    |> Ecto.Changeset.validate_number(:lat, less_than_or_equal_to: 90)
   end
 
   def update_name(station, newname) do
