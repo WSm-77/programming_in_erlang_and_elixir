@@ -17,6 +17,7 @@ defmodule Pollutiondb.Application do
       # {Pollutiondb.Worker, arg},
       # Start to serve requests, typically the last entry
       PollutiondbWeb.Endpoint,
+      Pollutiondb.Repo
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

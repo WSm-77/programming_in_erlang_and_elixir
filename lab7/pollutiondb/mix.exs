@@ -55,6 +55,8 @@ defmodule Pollutiondb.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
+      {:ecto_sql, "~> 3.11"},
+      {:ecto_sqlite3, "~> 0.15"},
     ]
   end
 
